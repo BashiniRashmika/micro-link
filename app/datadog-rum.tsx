@@ -11,7 +11,8 @@ export function DatadogRUM() {
         datadogRum.init({
           applicationId: process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID || '',
           clientToken: process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN || '',
-          site: 'datadoghq.com', // or 'datadoghq.eu' if you're using EU
+          site: 'us5.datadoghq.com',
+          //site: 'datadoghq.com', // or 'datadoghq.eu' if you're using EU
           service: 'micro-link',
           env: process.env.NEXT_PUBLIC_VERCEL_ENV || 'development',
           version: '1.0.0',
