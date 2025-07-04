@@ -2,9 +2,8 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from 'next/font/google'
-import Script from "next/script" // Correctly imported
+import Script from "next/script"
 import "./globals.css"
-
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 
@@ -23,45 +22,42 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
-          <Toaster />
-        </ThemeProvider>
-
-        {/* Datadog RUM Script - Corrected */}
-        <Script id="datadog-rum" strategy="beforeInteractive"> {/* Changed strategy to 'beforeInteractive' to load earlier */}
+      <head>
+        {/* Datadog RUM CDN Async - Using the exact code from Datadog */}
+        <Script id="datadog-rum" strategy="beforeInteractive">
           {`
             (function(h,o,u,n,d) {
               h=h[d]=h[d]||{q:[],onReady:function(c){h.q.push(c)}};
               d=o.createElement(u);d.async=1;d.src=n;
               n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n);
-            })(window,document,'script','https://www.datadoghq-browser-agent.com/datadog-rum-latest.js','DD_RUM'); // <-- CORRECTED URL: -latest.js
-
-            // IMPORTANT: Use DD_RUM.init and DD_RUM.setUser as per the CDN snippet
-            DD_RUM.onReady(function() {
-              DD_RUM.init({ // <-- CORRECTED: Use DD_RUM.init, not datadogRum.init
-                applicationId: '${process.env.NEXT_PUBLIC_DATADOG_APPLICATION_ID}',
-                clientToken: '${process.env.NEXT_PUBLIC_DATADOG_CLIENT_TOKEN}',
-                site: 'us5.datadoghq.com', // <-- CORRECTED: Based on your Datadog setup screenshot
+            })(window,document,'script','https://www.datadoghq-browser-agent.com/us5/v6/datadog-rum.js','DD_RUM');
+            
+            window.DD_RUM.onReady(function() {
+              window.DD_RUM.init({
+                clientToken: 'pub03071b05f8a072412f3f0f3ac8ab552c',
+                applicationId: '67f4dace-2c15-485d-8524-ccc19cabed49',
+                site: 'us5.datadoghq.com',
                 service: 'micro-link',
-                env: '${process.env.NEXT_PUBLIC_DATADOG_ENV || 'production'}', // <-- Using env var for consistency
-                version: '1.0.0', // Consider using process.env.NEXT_PUBLIC_APP_VERSION
-                sampleRate: 100,
-                sessionReplaySampleRate: 20, // <-- ADDED: Based on your Datadog setup
-                trackInteractions: true,
+                env: 'production',
+                version: '1.0.0',
+                sessionSampleRate: 100,
+                sessionReplaySampleRate: 20,
+                trackUserInteractions: true,
+                trackResources: true,
+                trackLongTasks: true,
                 defaultPrivacyLevel: 'mask-user-input'
               });
-
-              // Example of setting user info - make sure to get real user data
-              DD_RUM.setUser({
-                id: 'your-user-id', // Replace with actual user ID
-                name: 'your-user-name', // Replace with actual user name
-                email: 'your-user-email@example.com' // Replace with actual user email
-              });
+              
+              console.log('✅ Datadog RUM initialized successfully');
             });
           `}
         </Script>
+      </head>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   )
